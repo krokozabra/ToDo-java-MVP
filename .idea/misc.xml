@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/activity_add_quest_view.xml" value="0.19375" />
         <entry key="app/src/main/res/layout/activity_everyday.xml" value="0.19375" />
         <entry key="app/src/main/res/layout/item_task.xml" value="0.19375" />
         <entry key="app/src/main/res/menu/dots_every_menu.xml" value="0.19375" />
