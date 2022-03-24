@@ -30,7 +30,7 @@ public class AddQuestView extends AppCompatActivity implements AddQuestInterface
     private AddQuestPresenter presenter;
 
     Button addQuestBTN;
-    EditText nameET, decriptionET, dateET;
+    EditText nameET, descriptionET, dateET;
     CheckBox everyDayCB;
 
     Calendar dateExec= Calendar.getInstance();
@@ -46,13 +46,14 @@ public class AddQuestView extends AppCompatActivity implements AddQuestInterface
     private void init() {
         addQuestBTN = findViewById(R.id.aaqv_btn_add);
         nameET = findViewById(R.id.aaqv_et_name);
-        decriptionET = findViewById(R.id.aaqv_et_decription);
+        descriptionET = findViewById(R.id.aaqv_et_decription);
         dateET = findViewById(R.id.aaqv_et_date);
         everyDayCB = findViewById(R.id.aaqv_cb_every_day);
 
         addQuestBTN.setOnClickListener(v ->
         {
             //метод презентера
+            presenter.addNewQuest();
         });
 
         everyDayCB.setOnClickListener(v ->
@@ -91,13 +92,22 @@ public class AddQuestView extends AppCompatActivity implements AddQuestInterface
 
     @Override
     public ToDoData getNewQuest() {
+        ToDoData newQuest = new ToDoData();
+        newQuest.setName(nameET.getText().toString());
+        newQuest.setDescription(descriptionET.getText().toString());
+        newQuest.setEveryday( (everyDayCB.isChecked()) ? 1 : 0);
+        newQuest.setDay(Integer.toString(dateExec.get(Calendar.DAY_OF_MONTH)));
+        newQuest.setMonth(Integer.toString(dateExec.get(Calendar.MONTH)));
+        newQuest.setYear(Integer.toString(dateExec.get(Calendar.YEAR)));
 
-        return null;
+        return newQuest;
     }
 
     @Override
     public void startOtherScreen(Class activity) {
-
+        if (activity == MainActivity.class)
+            MainActivity.start(this);
+        finish();
     }
 
     // отображаем диалоговое окно для выбора даты

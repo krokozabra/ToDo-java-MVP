@@ -1,9 +1,11 @@
 package com.kondaurov.todojavamvp.presenter;
 
+import com.kondaurov.todojavamvp.common.ToDoData;
 import com.kondaurov.todojavamvp.interfaces.AddQuestInterface;
 import com.kondaurov.todojavamvp.interfaces.ToDoInterface;
 import com.kondaurov.todojavamvp.model.QuestModel;
 import com.kondaurov.todojavamvp.model.ToDoModel;
+import com.kondaurov.todojavamvp.view.MainActivity;
 
 public class AddQuestPresenter {
 
@@ -29,5 +31,15 @@ public class AddQuestPresenter {
     public void clickDate()
     {
         view.setDate();
+    }
+
+    public void addNewQuest()
+    {
+        //вызов метода view которые собирает данные и возвращает их сюда
+        ToDoData newQuest = view.getNewQuest();
+        //вызов метода модели с передачей в него нового квеста
+        model.addQuest(newQuest);
+
+        view.startOtherScreen(MainActivity.class);
     }
 }

@@ -34,6 +34,12 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     SwipeRefreshLayout mSwipeRefreshLayout;
 
 
+    public static void start(@NonNull Activity activity) {
+        Intent intent = new Intent(activity, MainActivity.class);
+        activity.startActivity(intent);
+    }
+
+
     @Override
     public void onRefresh() {
         toDoList.clear();

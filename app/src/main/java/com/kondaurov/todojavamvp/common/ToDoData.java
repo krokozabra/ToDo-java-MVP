@@ -12,6 +12,17 @@ public class ToDoData {
     private int OK;
     private int everyday;
 
+    public ToDoData() {
+        id = 0;
+        name = "";
+        day = "";
+        month = "";
+        year = "";
+        description = "";
+        OK = 0;
+        everyday = 0;
+    }
+
     public int getId() {
         return id;
     }

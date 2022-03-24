@@ -1,5 +1,6 @@
 package com.kondaurov.todojavamvp.model;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import java.util.Calendar;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class QuestModel {
@@ -24,39 +26,62 @@ public class QuestModel {
         this.dbHelper = dbHelper;
     }
 
-    public void addQuest(Observer<ArrayList<ToDoData>> observer)
+    @SuppressLint("CheckResult")
+    public void addQuest(ToDoData newQuest)
     {
-       /* Observable.fromArray(addNewQuest())
+        Observable.just(newQuest)
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(observer);*/
+                .subscribe(observer);
     }
 
+    Observer<ToDoData> observer = new Observer<ToDoData>() {
+
+        @Override
+        public void onSubscribe(Disposable d) {
+            System.out.println("onSubscribe: ");
+
+        }
+
+        @Override
+        public void onNext(ToDoData toDoData) {
+            addNewQuest(toDoData);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            System.out.println("onError: ");
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("onComplete: All Done!");
+        }
+    };
     //Добавление нового квеста
-    /*private Void addNewQuest(ToDoData quest) {
-        String name = etName.getText().toString();
-        String description = etDecription.getText().toString();
+    //добавить в выполнение в observer
+    private void addNewQuest(ToDoData quest) {
 
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
 
-        if(cbEveryDay.isChecked()) {
-            contentValues.put(DBHelper.TWO_NAME_TODO, name);
-            contentValues.put(DBHelper.TWO_DESCRIPTION_TODO, description);
+        if(quest.getEveryday()==1) {
+            contentValues.put(DBHelper.TWO_NAME_TODO, quest.getName());
+            contentValues.put(DBHelper.TWO_DESCRIPTION_TODO, quest.getDescription());
             database.insert(DBHelper.TABLE_EVERY_DAY_LIST, null, contentValues);
         }
         else {
-            contentValues.put(DBHelper.ONE_NAME_TODO, name);
-            contentValues.put(DBHelper.ONE_DESCRIPTION_TODO, description);
-            contentValues.put(DBHelper.ONE_DAY_TODO, dateExec.get(Calendar.DAY_OF_MONTH));
-            contentValues.put(DBHelper.ONE_MONTH_TODO, dateExec.get(Calendar.MONTH));
-            contentValues.put(DBHelper.ONE_YEAR_TODO, dateExec.get(Calendar.YEAR));
+            contentValues.put(DBHelper.ONE_NAME_TODO, quest.getName());
+            contentValues.put(DBHelper.ONE_DESCRIPTION_TODO, quest.getDescription());
+            contentValues.put(DBHelper.ONE_DAY_TODO, quest.getDay());
+            contentValues.put(DBHelper.ONE_MONTH_TODO, quest.getMonth());
+            contentValues.put(DBHelper.ONE_YEAR_TODO, quest.getYear());
             contentValues.put(DBHelper.ONE_OK_TODO, 0);
             database.insert(DBHelper.TABLE_TO_DO_LIST, null, contentValues);
         }
         dbHelper.close();
 
-        //переход на новый экран
+    }
 
-    }*/
+
 }
