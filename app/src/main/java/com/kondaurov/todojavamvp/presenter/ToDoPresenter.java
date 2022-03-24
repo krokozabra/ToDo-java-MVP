@@ -27,16 +27,16 @@ public class ToDoPresenter {
     }
 
     public void viewIsReady() {
-        loadUsers();
+        loadList();
     }
 
-    public void loadUsers() {
+    public void loadList() {
         //RxJava
         model.loadToDo(observer);
 
     }
 
-    public void addQuest(Class activity){
+    public void startAddQuest(Class activity){
         view.startOtherScreen(activity);
     }
 
@@ -53,7 +53,7 @@ public class ToDoPresenter {
             for (ToDoData x : toDoData) {
                 System.out.println(x.getId() + " " + x.getName() + " " + x.getOK());
             }
-            view.showUsers(toDoData);
+            view.showList(toDoData);
 
         }
 

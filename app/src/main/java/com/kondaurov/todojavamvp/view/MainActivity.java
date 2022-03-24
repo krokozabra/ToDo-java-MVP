@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
         toDoList.clear();
         list.setAdapter(null);
         //засунуть метод опроса библии через презентера
+        presenter.loadList();
         mSwipeRefreshLayout.setRefreshing(false); // останавливает анимацию загрузки
 
     }
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
 
         switch (id) {
             case R.id.action_add: {
-                presenter.addQuest(AddQuestView.class);
+                presenter.startAddQuest(AddQuestView.class);
                 break;
             }
             case R.id.action_every: {
@@ -86,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
         list = findViewById(R.id.am_list);
         toDoAdapter = new ToDoAdapter(this, toDoList);
 
-
-
         DBHelper dbHelper = new DBHelper(this);
         ToDoModel toDoModel = new ToDoModel(dbHelper);
         presenter = new ToDoPresenter(toDoModel);
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     }
 
     @Override
-    public void showUsers(List<ToDoData> listToDo) {
+    public void showList(List<ToDoData> listToDo) {
         toDoList.clear();
         toDoList.addAll(listToDo);
         //по идее нужно оставить только setAdapter

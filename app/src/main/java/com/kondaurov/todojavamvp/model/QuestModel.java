@@ -20,15 +20,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class QuestModel {
 
+    final static String LOG_TAG = "work width QuestModel";
     private final DBHelper dbHelper;
+
 
     public QuestModel(DBHelper dbHelper) {
         this.dbHelper = dbHelper;
     }
 
     @SuppressLint("CheckResult")
-    public void addQuest(ToDoData newQuest)
-    {
+    public void addQuest(ToDoData newQuest) {
         Observable.just(newQuest)
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(observer);
@@ -57,6 +58,7 @@ public class QuestModel {
             System.out.println("onComplete: All Done!");
         }
     };
+
     //Добавление нового квеста
     //добавить в выполнение в observer
     private void addNewQuest(ToDoData quest) {
@@ -65,12 +67,11 @@ public class QuestModel {
 
         ContentValues contentValues = new ContentValues();
 
-        if(quest.getEveryday()==1) {
+        if (quest.getEveryday() == 1) {
             contentValues.put(DBHelper.TWO_NAME_TODO, quest.getName());
             contentValues.put(DBHelper.TWO_DESCRIPTION_TODO, quest.getDescription());
             database.insert(DBHelper.TABLE_EVERY_DAY_LIST, null, contentValues);
-        }
-        else {
+        } else {
             contentValues.put(DBHelper.ONE_NAME_TODO, quest.getName());
             contentValues.put(DBHelper.ONE_DESCRIPTION_TODO, quest.getDescription());
             contentValues.put(DBHelper.ONE_DAY_TODO, quest.getDay());
@@ -82,6 +83,8 @@ public class QuestModel {
         dbHelper.close();
 
     }
+
+
 
 
 }

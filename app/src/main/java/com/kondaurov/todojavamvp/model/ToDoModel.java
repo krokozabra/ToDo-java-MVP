@@ -1,5 +1,6 @@
 package com.kondaurov.todojavamvp.model;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -16,6 +17,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ToDoModel {
 
+    final static String LOG_TAG = "work width ToDoModel";
+
     private final DBHelper dbHelper;
 
     public ToDoModel(DBHelper dbHelper) {
@@ -31,6 +34,9 @@ public class ToDoModel {
 
     //полусение списка заданий на сегодняшний день
     private ArrayList<ToDoData> getToDoList() {
+        //проверка на ежедневные задания сегодня
+        checkEverydayInTask();
+
         ArrayList<ToDoData> todos = new ArrayList<>();
         Calendar today = Calendar.getInstance();
         SQLiteDatabase database = dbHelper.getWritableDatabase();
@@ -59,5 +65,90 @@ public class ToDoModel {
         dbHelper.close();
 
         return todos;
+    }
+
+    public void checkEverydayInTask() {
+        Calendar today = Calendar.getInstance();
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        Cursor cursor;
+
+        Log.d(LOG_TAG, "---INNER JOIN with query---");
+        String table = DBHelper.TABLE_TO_DO_LIST + " as t, " + DBHelper.TABLE_EVERY_DAY_LIST + " as e ";
+        String[] columns = {"*"};
+        String selection = "(" +
+                "t." + DBHelper.ONE_DAY_TODO + " = " + today.get(Calendar.DAY_OF_MONTH) + " AND " +
+                "t." + DBHelper.ONE_MONTH_TODO + " = " + today.get(Calendar.MONTH) + " AND " +
+                "t." + DBHelper.ONE_YEAR_TODO + " = " + today.get(Calendar.YEAR) + " AND " +
+                "t." + DBHelper.ONE_NAME_TODO + " = e." + DBHelper.TWO_NAME_TODO + " AND " +
+                "t." + DBHelper.ONE_DESCRIPTION_TODO + " = e." + DBHelper.TWO_DESCRIPTION_TODO + ")";
+        cursor = database.query(table, columns, selection, null, null, null, null);
+        int countEveryInToDo = cursor.getCount();
+        System.out.println("размер курсора =" + cursor.getCount());
+        cursor.close();
+
+        cursor = database.query(DBHelper.TABLE_EVERY_DAY_LIST, null, null, null, null, null, null);
+        int countEveryDay = cursor.getCount();
+        cursor.close();
+
+        if (countEveryInToDo != countEveryDay) {
+            insertInToDo();
+        }
+
+        dbHelper.close();
+
+    }
+
+    public void insertInToDo() {
+
+        Calendar today = Calendar.getInstance();
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        Cursor cursorEveryDay = database.query(DBHelper.TABLE_EVERY_DAY_LIST, null, null, null, null, null, null);
+
+        String select = "(" +
+                "t." + DBHelper.ONE_DAY_TODO + " = " + today.get(Calendar.DAY_OF_MONTH) + " AND " +
+                "t." + DBHelper.ONE_MONTH_TODO + " = " + today.get(Calendar.MONTH) + " AND " +
+                "t." + DBHelper.ONE_YEAR_TODO + " = " + today.get(Calendar.YEAR) + ")";
+        Cursor cursorToDo = database.query(DBHelper.TABLE_TO_DO_LIST + " as t ", null, select, null, null, null, null);
+
+        int nameIndexEvery = cursorEveryDay.getColumnIndex(DBHelper.TWO_NAME_TODO);
+        int descIndexEvery = cursorEveryDay.getColumnIndex(DBHelper.TWO_DESCRIPTION_TODO);
+
+        int nameIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_NAME_TODO);
+        int descIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_DESCRIPTION_TODO);
+
+        cursorEveryDay.moveToFirst();
+        do {
+            cursorToDo.moveToFirst();
+            do {
+                if (cursorToDo.getString(nameIndexToDo).equals(cursorEveryDay.getString(nameIndexEvery))
+                        && cursorToDo.getString(descIndexToDo).equals(cursorEveryDay.getString(descIndexEvery))) {
+                    cursorToDo.moveToLast();
+                } else {
+                    //добавление недостающих квестов
+                    ContentValues cv = new ContentValues();
+                    try {
+
+                        cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
+                        cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
+                        cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
+                        cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
+                        cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
+                        cv.put(DBHelper.ONE_OK_TODO, 0);
+
+                        database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
+
+                    } catch (Exception e) {
+                        Log.d("mainLog", "exept: " + e);
+                    }
+                }
+
+            } while (cursorToDo.moveToNext());
+        } while (cursorEveryDay.moveToNext());
+
+
+        cursorToDo.close();
+        cursorEveryDay.close();
+        dbHelper.close();
     }
 }
