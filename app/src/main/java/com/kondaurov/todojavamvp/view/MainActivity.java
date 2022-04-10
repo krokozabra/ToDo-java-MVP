@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     public void onRefresh() {
         toDoList.clear();
         list.setAdapter(null);
-        //засунуть метод опроса библии через презентера
         presenter.loadList();
         mSwipeRefreshLayout.setRefreshing(false); // останавливает анимацию загрузки
 
@@ -84,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     {
         setTitle("Квесты на сегодня");
 
+        mSwipeRefreshLayout = findViewById(R.id.am_swipe);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         list = findViewById(R.id.am_list);
         toDoAdapter = new ToDoAdapter(this, toDoList);
 
@@ -98,10 +100,17 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     public void showList(List<ToDoData> listToDo) {
         toDoList.clear();
         toDoList.addAll(listToDo);
-        //по идее нужно оставить только setAdapter
-        //для этого нужно изменить ToDoAdapter
-        list.setAdapter(toDoAdapter);
+        //прочитать про runOnUiThread
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                list.setAdapter(toDoAdapter);
+            }
+        });
     }
+
+
 
     @Override
     public void startOtherScreen(Class activity) {
@@ -113,5 +122,11 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     public void openEverydayScreen() {
         EverydayActivity.start(this);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
     }
 }

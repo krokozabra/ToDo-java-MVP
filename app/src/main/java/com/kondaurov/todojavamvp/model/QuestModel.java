@@ -32,10 +32,10 @@ public class QuestModel {
     public void addQuest(ToDoData newQuest) {
         Observable.just(newQuest)
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(observer);
+                .subscribe(observerAdd);
     }
 
-    Observer<ToDoData> observer = new Observer<ToDoData>() {
+    Observer<ToDoData> observerAdd = new Observer<ToDoData>() {
 
         @Override
         public void onSubscribe(Disposable d) {
@@ -58,6 +58,14 @@ public class QuestModel {
             System.out.println("onComplete: All Done!");
         }
     };
+
+    @SuppressLint("CheckResult")
+    public void getQuest(int id, int every, Observer<ToDoData> observerGet) {
+        Observable.just(getDBQuest(id, every))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(observerGet);
+    }
+
 
     //Добавление нового квеста
     //добавить в выполнение в observer
@@ -84,7 +92,76 @@ public class QuestModel {
 
     }
 
+    private ToDoData getDBQuest(int id, int everyday) {
+
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        ToDoData currentQuest = new ToDoData();
+        Cursor cursor;
+        if (everyday == 0) {
+            cursor = database.query(DBHelper.TABLE_TO_DO_LIST, null, DBHelper.ONE_KEY_ID + " = " + id, null, null, null, null);
+            cursor.moveToFirst();
+
+            int idIndex = cursor.getColumnIndex(DBHelper.ONE_KEY_ID);
+            int nameIndex = cursor.getColumnIndex(DBHelper.ONE_NAME_TODO);
+            int descIndex = cursor.getColumnIndex(DBHelper.ONE_DESCRIPTION_TODO);
+            int dayIndex = cursor.getColumnIndex(DBHelper.ONE_DAY_TODO);
+            int monthIndex = cursor.getColumnIndex(DBHelper.ONE_MONTH_TODO);
+            int yearIndex = cursor.getColumnIndex(DBHelper.ONE_YEAR_TODO);
+            int OKIndex = cursor.getColumnIndex(DBHelper.ONE_OK_TODO);
+
+            System.out.println("cursor query = "+id);
+            System.out.println("cursor size = "+cursor.getCount());
+
+            System.out.println(cursor.getInt(idIndex));
+            System.out.println(cursor.getString(nameIndex));
+            System.out.println(cursor.getString(dayIndex));
+            System.out.println(dayIndex);
+            System.out.println(monthIndex);
+            System.out.println(yearIndex);
+            System.out.println(OKIndex);
+
+            currentQuest = new ToDoData(cursor.getInt(idIndex), cursor.getString(nameIndex), cursor.getString(dayIndex), cursor.getString(monthIndex), cursor.getString(yearIndex), cursor.getString(descIndex), cursor.getInt(OKIndex), everyday);
+        } else {
+            //что то тут не чисто. подумать надо над логикой вывода из этого метода. может даже убрать вывод из ежедневной таблицы
+            cursor = database.query(DBHelper.TABLE_EVERY_DAY_LIST, null, DBHelper.TWO_KEY_ID + " = " + id, null, null, null, null);
+
+            cursor.moveToFirst();
+
+            int idIndex = cursor.getColumnIndex(DBHelper.TWO_KEY_ID);
+            int nameIndex = cursor.getColumnIndex(DBHelper.TWO_NAME_TODO);
+            int descIndex = cursor.getColumnIndex(DBHelper.TWO_DESCRIPTION_TODO);
 
 
+            currentQuest = new ToDoData(cursor.getInt(idIndex), cursor.getString(nameIndex), "0", "0", "0", cursor.getString(descIndex), 0, everyday);
+        }
+        cursor.close();
+        dbHelper.close();
+        return currentQuest;
+    }
+
+    private void completeQuest(ToDoData quest) {
+
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+
+        if (quest.getEveryday() == 1) {
+            contentValues.put(DBHelper.TWO_NAME_TODO, quest.getName());
+            contentValues.put(DBHelper.TWO_DESCRIPTION_TODO, quest.getDescription());
+            database.insert(DBHelper.TABLE_EVERY_DAY_LIST, null, contentValues);
+        } else {
+            contentValues.put(DBHelper.ONE_NAME_TODO, quest.getName());
+            contentValues.put(DBHelper.ONE_DESCRIPTION_TODO, quest.getDescription());
+            contentValues.put(DBHelper.ONE_DAY_TODO, quest.getDay());
+            contentValues.put(DBHelper.ONE_MONTH_TODO, quest.getMonth());
+            contentValues.put(DBHelper.ONE_YEAR_TODO, quest.getYear());
+            contentValues.put(DBHelper.ONE_OK_TODO, 0);
+            database.insert(DBHelper.TABLE_TO_DO_LIST, null, contentValues);
+        }
+        dbHelper.close();
+
+    }
 
 }
+
+//в последствии добавить изменить квест, хорошо подойдёт для ежедневок, но сделать для всех

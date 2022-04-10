@@ -83,25 +83,28 @@ public class ToDoAdapter extends BaseAdapter {
         });
 
         flagTack = view.findViewById(R.id.it_check);
+        View finalView = view;
         flagTack.setOnClickListener(v->
         {
-            System.out.println("значение текущего таска: "+p.getOK());
+//            System.out.println("значение текущего таска: "+p.getOK());
             compTask ct = new compTask();
+            //окрашивается при нажатии на чекбокс
             if (p.getOK()==0) {
                 ct.execute(1, p.getId());
                 p.setOK(1);
+                spase = finalView.findViewById(R.id.it_space);
                 spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.green));
-
             }
             else {
                 ct.execute(0, p.getId());
                 p.setOK(0);
+                spase = finalView.findViewById(R.id.it_space);
                 spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.white));
 
             }
         });
 
-
+        //для изначального окрашивания
         if (p.getOK() == 1) {
             ((CheckBox) view.findViewById(R.id.it_check)).setChecked(true);
             spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.green));
@@ -119,6 +122,8 @@ public class ToDoAdapter extends BaseAdapter {
         return ((ToDoData) getItem(position));
     }
 
+
+    //убрать, заменить обсёрами
     private class compTask extends AsyncTask<Integer, Void, Void> {
 
         @Override
