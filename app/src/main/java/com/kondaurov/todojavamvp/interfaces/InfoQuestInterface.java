@@ -9,6 +9,7 @@ public interface InfoQuestInterface {
 
     void showQuest(ToDoData quest);
     void startOtherScreen(Class activity);
-    void deleteQuest();
-    void completeQuest();
+/*    ToDoData deleteQuest();
+    ToDoData completeQuest();*/
+    ToDoData getCurrentQuest();
 }

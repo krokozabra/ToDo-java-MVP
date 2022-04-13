@@ -23,6 +23,7 @@ public class InfoView extends AppCompatActivity implements InfoQuestInterface {
     private InfoQuestPresenter presenter;
     private int everyday;
     private int id;
+    private ToDoData currentQuest;
 
     TextView name, description, date;
     Button dellBtn, completeBtn;
@@ -78,6 +79,8 @@ public class InfoView extends AppCompatActivity implements InfoQuestInterface {
     @Override
     public void showQuest(ToDoData quest) {
 
+        currentQuest = quest;
+        setTitle(currentQuest.getName());
         name.setText(quest.getName());
         description.setText(quest.getDescription());
         date.setText(quest.getDay()+"."+quest.getMonth()+"."+quest.getYear());
@@ -86,18 +89,17 @@ public class InfoView extends AppCompatActivity implements InfoQuestInterface {
 
     @Override
     public void startOtherScreen(Class activity) {
-
+        if (activity == MainActivity.class)
+            MainActivity.start(this);
+        finish();
     }
+
 
     @Override
-    public void deleteQuest() {
-
+    public ToDoData getCurrentQuest() {
+        return currentQuest;
     }
 
-    @Override
-    public void completeQuest() {
-
-    }
 
     @Override
     protected void onDestroy() {

@@ -55,12 +55,22 @@ public class InfoQuestPresenter {
 
     public void deleteQuest()
     {
+        //вызов метода view которые собирает данные и возвращает их сюда
+        ToDoData delQuest = view.getCurrentQuest();
+        //вызов метода модели с передачей в него нового квеста
+        model.deleteQuest(delQuest);
 
+        view.startOtherScreen(MainActivity.class);
     }
 
     public void completeQuest()
     {
+        //вызов метода view которые собирает данные и возвращает их сюда
+        ToDoData complQuest = view.getCurrentQuest();
+        complQuest.setOK(1);
+        model.completeQuest(complQuest);
 
+        view.startOtherScreen(MainActivity.class);
     }
 
 

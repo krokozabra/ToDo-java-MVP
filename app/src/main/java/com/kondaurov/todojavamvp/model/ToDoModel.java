@@ -25,8 +25,7 @@ public class ToDoModel {
         this.dbHelper = dbHelper;
     }
 
-    public void loadToDo(Observer<ToDoData> observer)
-    {
+    public void loadToDo(Observer<ToDoData> observer) {
         Observable.fromIterable(getToDoList())
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(observer);
@@ -117,14 +116,20 @@ public class ToDoModel {
         int nameIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_NAME_TODO);
         int descIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_DESCRIPTION_TODO);
 
-        if(cursorEveryDay.moveToFirst())
-        do {
-            if(cursorToDo.moveToFirst())
+
+        //ошибка, добавляется ровно столько, сколько не ежедневных квестов
+        if (cursorToDo.moveToFirst())
             do {
-                if (cursorToDo.getString(nameIndexToDo).equals(cursorEveryDay.getString(nameIndexEvery))
-                        && cursorToDo.getString(descIndexToDo).equals(cursorEveryDay.getString(descIndexEvery))) {
-                    cursorToDo.moveToLast();
-                } else {
+                boolean OK = false;
+                if (cursorEveryDay.moveToFirst())
+                    do {
+                        if (cursorToDo.getString(nameIndexToDo).equals(cursorEveryDay.getString(nameIndexEvery))
+                                && cursorToDo.getString(descIndexToDo).equals(cursorEveryDay.getString(descIndexEvery)))
+                            OK = true;
+
+                    } while (cursorEveryDay.moveToNext());
+
+                if (!OK) {
                     //добавление недостающих квестов
                     ContentValues cv = new ContentValues();
                     try {
@@ -142,27 +147,25 @@ public class ToDoModel {
                         Log.d("mainLog", "exept: " + e);
                     }
                 }
-
             } while (cursorToDo.moveToNext());
-            else // рас уж пустой, то точно там нет ежедневок, если, конечно, ежедневки вообще есть
-            {
-                ContentValues cv = new ContentValues();
-                try {
+        else // рас уж пустой, то точно там нет ежедневок, если, конечно, ежедневки вообще есть
+        {
+            ContentValues cv = new ContentValues();
+            try {
 
-                    cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
-                    cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
-                    cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
-                    cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
-                    cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
-                    cv.put(DBHelper.ONE_OK_TODO, 0);
+                cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
+                cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
+                cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
+                cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
+                cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
+                cv.put(DBHelper.ONE_OK_TODO, 0);
 
-                    database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
+                database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
 
-                } catch (Exception e) {
-                    Log.d("mainLog", "exept: " + e);
-                }
+            } catch (Exception e) {
+                Log.d("mainLog", "exept: " + e);
             }
-        } while (cursorEveryDay.moveToNext());
+        }
 
 
         cursorToDo.close();

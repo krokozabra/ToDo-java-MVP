@@ -38,7 +38,8 @@ public class ToDoPresenter {
 
     }
 
-    public void startAddQuest(Class activity) {
+    public void startAddQuest(Class activity)
+    {
         view.startOtherScreen(activity);
     }
 

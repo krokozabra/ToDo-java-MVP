@@ -17,11 +17,13 @@ import androidx.core.content.ContextCompat;
 
 import com.kondaurov.todojavamvp.R;
 import com.kondaurov.todojavamvp.database.DBHelper;
+import com.kondaurov.todojavamvp.model.QuestModel;
 import com.kondaurov.todojavamvp.view.InfoView;
 
 import java.util.ArrayList;
 
 public class ToDoAdapter extends BaseAdapter {
+
     Context ctx;
     LayoutInflater lInflater;
     ArrayList<ToDoData> objects;
@@ -29,6 +31,7 @@ public class ToDoAdapter extends BaseAdapter {
     CheckBox flagTack;
     RelativeLayout spase;
     DBHelper dbHelper;
+
 
     public ToDoAdapter(Context context, ArrayList<ToDoData> todos) {
         ctx = context;
@@ -84,23 +87,22 @@ public class ToDoAdapter extends BaseAdapter {
 
         flagTack = view.findViewById(R.id.it_check);
         View finalView = view;
+        QuestModel questModel = new QuestModel(dbHelper);
         flagTack.setOnClickListener(v->
         {
 //            System.out.println("значение текущего таска: "+p.getOK());
-            compTask ct = new compTask();
             //окрашивается при нажатии на чекбокс
             if (p.getOK()==0) {
-                ct.execute(1, p.getId());
                 p.setOK(1);
+                questModel.completeQuest(p);
                 spase = finalView.findViewById(R.id.it_space);
                 spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.green));
             }
             else {
-                ct.execute(0, p.getId());
                 p.setOK(0);
+                questModel.completeQuest(p);
                 spase = finalView.findViewById(R.id.it_space);
                 spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.white));
-
             }
         });
 
@@ -112,7 +114,6 @@ public class ToDoAdapter extends BaseAdapter {
         else {
             ((CheckBox) view.findViewById(R.id.it_check)).setChecked(false);
             spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.white));
-
         }
 
         return view;
@@ -124,7 +125,7 @@ public class ToDoAdapter extends BaseAdapter {
 
 
     //убрать, заменить обсёрами
-    private class compTask extends AsyncTask<Integer, Void, Void> {
+/*    private class compTask extends AsyncTask<Integer, Void, Void> {
 
         @Override
         protected Void doInBackground(Integer... params) {
@@ -148,5 +149,5 @@ public class ToDoAdapter extends BaseAdapter {
             super.onPostExecute(params);
 
         }
-    }
+    }*/
 }

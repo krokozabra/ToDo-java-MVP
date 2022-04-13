@@ -60,6 +60,67 @@ public class QuestModel {
     };
 
     @SuppressLint("CheckResult")
+    public void deleteQuest(ToDoData quest) {
+        Observable.just(quest)
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(observerDel);
+    }
+
+    Observer<ToDoData> observerDel = new Observer<ToDoData>() {
+
+        @Override
+        public void onSubscribe(Disposable d) {
+            System.out.println("onSubscribe: ");
+
+        }
+
+        @Override
+        public void onNext(ToDoData toDoData) {
+            deleteDBQuest(toDoData);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            System.out.println("onError: ");
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("onComplete: All Done!");
+        }
+    };
+
+    public void completeQuest(ToDoData quest) {
+        Observable.just(quest)
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(observerComplete);
+    }
+
+    Observer<ToDoData> observerComplete = new Observer<ToDoData>() {
+
+        @Override
+        public void onSubscribe(Disposable d) {
+            System.out.println("onSubscribe: ");
+
+        }
+
+        @Override
+        public void onNext(ToDoData quest) {
+            completeDBQuest(quest);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            System.out.println("onError: ");
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("onComplete: All Done!");
+        }
+    };
+
+    @SuppressLint("CheckResult")
     public void getQuest(int id, int every, Observer<ToDoData> observerGet) {
         Observable.just(getDBQuest(id, every))
                 .subscribeOn(Schedulers.newThread())
@@ -109,8 +170,8 @@ public class QuestModel {
             int yearIndex = cursor.getColumnIndex(DBHelper.ONE_YEAR_TODO);
             int OKIndex = cursor.getColumnIndex(DBHelper.ONE_OK_TODO);
 
-            System.out.println("cursor query = "+id);
-            System.out.println("cursor size = "+cursor.getCount());
+            System.out.println("cursor query = " + id);
+            System.out.println("cursor size = " + cursor.getCount());
 
             System.out.println(cursor.getInt(idIndex));
             System.out.println(cursor.getString(nameIndex));
@@ -139,29 +200,25 @@ public class QuestModel {
         return currentQuest;
     }
 
-    private void completeQuest(ToDoData quest) {
+    private void completeDBQuest(ToDoData quest) {
 
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
-        ContentValues contentValues = new ContentValues();
+        ContentValues cv = new ContentValues();
+        cv.put(DBHelper.ONE_OK_TODO, quest.getOK());
+        database.update(DBHelper.TABLE_TO_DO_LIST, cv, DBHelper.ONE_KEY_ID + " = " + quest.getId(), null);
 
-        if (quest.getEveryday() == 1) {
-            contentValues.put(DBHelper.TWO_NAME_TODO, quest.getName());
-            contentValues.put(DBHelper.TWO_DESCRIPTION_TODO, quest.getDescription());
-            database.insert(DBHelper.TABLE_EVERY_DAY_LIST, null, contentValues);
-        } else {
-            contentValues.put(DBHelper.ONE_NAME_TODO, quest.getName());
-            contentValues.put(DBHelper.ONE_DESCRIPTION_TODO, quest.getDescription());
-            contentValues.put(DBHelper.ONE_DAY_TODO, quest.getDay());
-            contentValues.put(DBHelper.ONE_MONTH_TODO, quest.getMonth());
-            contentValues.put(DBHelper.ONE_YEAR_TODO, quest.getYear());
-            contentValues.put(DBHelper.ONE_OK_TODO, 0);
-            database.insert(DBHelper.TABLE_TO_DO_LIST, null, contentValues);
-        }
         dbHelper.close();
 
     }
 
+    private void deleteDBQuest(ToDoData quest) {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        database.delete(DBHelper.TABLE_TO_DO_LIST, DBHelper.ONE_KEY_ID + " = " + quest.getId(), null);
+
+        dbHelper.close();
+    }
 }
 
 //в последствии добавить изменить квест, хорошо подойдёт для ежедневок, но сделать для всех
