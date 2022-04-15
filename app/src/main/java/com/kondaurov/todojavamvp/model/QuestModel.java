@@ -40,7 +40,6 @@ public class QuestModel {
         @Override
         public void onSubscribe(Disposable d) {
             System.out.println("onSubscribe: ");
-
         }
 
         @Override
@@ -71,7 +70,6 @@ public class QuestModel {
         @Override
         public void onSubscribe(Disposable d) {
             System.out.println("onSubscribe: ");
-
         }
 
         @Override
@@ -101,7 +99,6 @@ public class QuestModel {
         @Override
         public void onSubscribe(Disposable d) {
             System.out.println("onSubscribe: ");
-
         }
 
         @Override
@@ -134,6 +131,8 @@ public class QuestModel {
 
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
+        System.out.println("добавляем новый квест"+ quest.getName());
+        System.out.println("ежедневный? "+ quest.getEveryday());
         ContentValues contentValues = new ContentValues();
 
         if (quest.getEveryday() == 1) {
@@ -156,7 +155,7 @@ public class QuestModel {
     private ToDoData getDBQuest(int id, int everyday) {
 
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        ToDoData currentQuest = new ToDoData();
+        ToDoData currentQuest;
         Cursor cursor;
         if (everyday == 0) {
             cursor = database.query(DBHelper.TABLE_TO_DO_LIST, null, DBHelper.ONE_KEY_ID + " = " + id, null, null, null, null);
@@ -170,8 +169,6 @@ public class QuestModel {
             int yearIndex = cursor.getColumnIndex(DBHelper.ONE_YEAR_TODO);
             int OKIndex = cursor.getColumnIndex(DBHelper.ONE_OK_TODO);
 
-            System.out.println("cursor query = " + id);
-            System.out.println("cursor size = " + cursor.getCount());
 
             System.out.println(cursor.getInt(idIndex));
             System.out.println(cursor.getString(nameIndex));

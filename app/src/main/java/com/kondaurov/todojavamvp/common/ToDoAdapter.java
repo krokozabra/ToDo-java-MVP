@@ -86,26 +86,30 @@ public class ToDoAdapter extends BaseAdapter {
         });
 
         flagTack = view.findViewById(R.id.it_check);
-        View finalView = view;
-        QuestModel questModel = new QuestModel(dbHelper);
-        flagTack.setOnClickListener(v->
-        {
+        if(p.getEveryday()==0) {
+            View finalView = view;
+            QuestModel questModel = new QuestModel(dbHelper);
+            flagTack.setOnClickListener(v ->
+            {
 //            System.out.println("значение текущего таска: "+p.getOK());
-            //окрашивается при нажатии на чекбокс
-            if (p.getOK()==0) {
-                p.setOK(1);
-                questModel.completeQuest(p);
-                spase = finalView.findViewById(R.id.it_space);
-                spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.green));
-            }
-            else {
-                p.setOK(0);
-                questModel.completeQuest(p);
-                spase = finalView.findViewById(R.id.it_space);
-                spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.white));
-            }
-        });
-
+                //окрашивается при нажатии на чекбокс
+                if (p.getOK() == 0) {
+                    p.setOK(1);
+                    questModel.completeQuest(p);
+                    spase = finalView.findViewById(R.id.it_space);
+                    spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.green));
+                } else {
+                    p.setOK(0);
+                    questModel.completeQuest(p);
+                    spase = finalView.findViewById(R.id.it_space);
+                    spase.setBackgroundColor(ContextCompat.getColor(ctx, R.color.white));
+                }
+            });
+        }
+        else
+        {
+            flagTack.setVisibility(View.GONE);
+        }
         //для изначального окрашивания
         if (p.getOK() == 1) {
             ((CheckBox) view.findViewById(R.id.it_check)).setChecked(true);
@@ -123,31 +127,4 @@ public class ToDoAdapter extends BaseAdapter {
         return ((ToDoData) getItem(position));
     }
 
-
-    //убрать, заменить обсёрами
-/*    private class compTask extends AsyncTask<Integer, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Integer... params) {
-            SQLiteDatabase database = dbHelper.getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put(DBHelper.ONE_OK_TODO, params[0]);
-            int cursor;
-            cursor = database.update(DBHelper.TABLE_TO_DO_LIST, cv, DBHelper.ONE_KEY_ID + " = " + params[1], null);
-
-            System.out.println("изменено строк: " + cursor);
-            System.out.println("что меняем: " + params[1]);
-            System.out.println("на что меняем: " + params[0]);
-
-            dbHelper.close();
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void params) {
-            super.onPostExecute(params);
-
-        }
-    }*/
 }

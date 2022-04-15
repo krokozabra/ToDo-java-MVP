@@ -1,26 +1,26 @@
 package com.kondaurov.todojavamvp.presenter;
 
 import com.kondaurov.todojavamvp.common.ToDoData;
+import com.kondaurov.todojavamvp.interfaces.EveryInterfase;
 import com.kondaurov.todojavamvp.interfaces.ToDoInterface;
-import com.kondaurov.todojavamvp.model.ToDoModel;
+import com.kondaurov.todojavamvp.model.EveryDayModel;
 
 import java.util.ArrayList;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
-public class ToDoPresenter {
+public class EveryDayPresenter {
 
-    private ToDoInterface view;
-    private final ToDoModel model;
-    private ArrayList<ToDoData> toDoList = new ArrayList<>();
+    private EveryInterfase view;
+    private final EveryDayModel model;
+    private ArrayList<ToDoData> everyList = new ArrayList<>();
 
-
-    public ToDoPresenter(ToDoModel model) {
+    public EveryDayPresenter(EveryDayModel model) {
         this.model = model;
     }
 
-    public void attachView(ToDoInterface view) {
+    public void attachView(EveryInterfase view) {
         this.view = view;
     }
 
@@ -34,11 +34,11 @@ public class ToDoPresenter {
 
     public void loadList() {
         //RxJava
-        model.loadToDo(observer);
+        model.loadEvery(observer);
 
     }
 
-    public void startOtherScreen(Class activity)
+    public void startAddQuest(Class activity)
     {
         view.startOtherScreen(activity);
     }
@@ -48,12 +48,12 @@ public class ToDoPresenter {
         @Override
         public void onSubscribe(Disposable d) {
             System.out.println("onSubscribe: ");
-            toDoList.clear();
+            everyList.clear();
         }
 
         @Override
         public void onNext(ToDoData toDoData) {
-            toDoList.add(toDoData);
+            everyList.add(toDoData);
 
         }
 
@@ -65,7 +65,7 @@ public class ToDoPresenter {
         @Override
         public void onComplete() {
             System.out.println("onComplete: All Done!");
-            view.showList(toDoList);
+            view.showList(everyList);
         }
     };
 }

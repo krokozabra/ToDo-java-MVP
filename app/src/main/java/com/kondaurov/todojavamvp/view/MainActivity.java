@@ -27,12 +27,10 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     private ToDoPresenter presenter;
 
     ListView list;
-
     ArrayList<ToDoData> toDoList = new ArrayList<>();
     ToDoAdapter toDoAdapter;
 
     SwipeRefreshLayout mSwipeRefreshLayout;
-
 
     public static void start(@NonNull Activity activity) {
         Intent intent = new Intent(activity, MainActivity.class);
@@ -61,11 +59,11 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
 
         switch (id) {
             case R.id.action_add: {
-                presenter.startAddQuest(AddQuestView.class);
+                presenter.startOtherScreen(AddQuestView.class);
                 break;
             }
             case R.id.action_every: {
-                //presenter
+                presenter.startOtherScreen(EverydayActivity.class);
                 break;
             }
         }
@@ -101,13 +99,7 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
         toDoList.clear();
         toDoList.addAll(listToDo);
         //прочитать про runOnUiThread
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                list.setAdapter(toDoAdapter);
-            }
-        });
+        runOnUiThread(() -> list.setAdapter(toDoAdapter));
     }
 
 
@@ -116,13 +108,11 @@ public class MainActivity extends AppCompatActivity implements ToDoInterface, Sw
     public void startOtherScreen(Class activity) {
         if (activity == AddQuestView.class)
             AddQuestView.start(this);
+        if (activity == EverydayActivity.class)
+            EverydayActivity.start(this);
         finish();
     }
 
-    public void openEverydayScreen() {
-        EverydayActivity.start(this);
-        finish();
-    }
 
     @Override
     protected void onDestroy() {

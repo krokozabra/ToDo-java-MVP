@@ -12,6 +12,7 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 
 import com.kondaurov.todojavamvp.R;
@@ -128,10 +129,12 @@ public class AddQuestView extends AppCompatActivity implements AddQuestInterface
 
 
     // установка обработчика выбора даты
-    DatePickerDialog.OnDateSetListener d= (view, year, monthOfYear, dayOfMonth) -> {
+    DatePickerDialog.OnDateSetListener d= this::onDateSet;
+
+    private void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         dateExec.set(Calendar.YEAR, year);
         dateExec.set(Calendar.MONTH, monthOfYear);
         dateExec.set(Calendar.DAY_OF_MONTH, dayOfMonth);
         showDate();
-    };
+    }
 }

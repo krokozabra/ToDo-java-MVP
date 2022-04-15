@@ -66,10 +66,13 @@ public class ToDoModel {
         return todos;
     }
 
+    //проверка недостающих ежедневок
     public void checkEverydayInTask() {
         Calendar today = Calendar.getInstance();
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         Cursor cursor;
+
+        //сделать вычитание таблиц
 
         Log.d(LOG_TAG, "---INNER JOIN with query---");
         String table = DBHelper.TABLE_TO_DO_LIST + " as t, " + DBHelper.TABLE_EVERY_DAY_LIST + " as e ";
@@ -82,11 +85,11 @@ public class ToDoModel {
                 "t." + DBHelper.ONE_DESCRIPTION_TODO + " = e." + DBHelper.TWO_DESCRIPTION_TODO + ")";
         cursor = database.query(table, columns, selection, null, null, null, null);
         int countEveryInToDo = cursor.getCount();
-        System.out.println("размер курсора =" + cursor.getCount());
         cursor.close();
 
         cursor = database.query(DBHelper.TABLE_EVERY_DAY_LIST, null, null, null, null, null, null);
         int countEveryDay = cursor.getCount();
+
         cursor.close();
 
         if (countEveryInToDo != countEveryDay) {
@@ -102,73 +105,39 @@ public class ToDoModel {
         Calendar today = Calendar.getInstance();
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
-        Cursor cursorEveryDay = database.query(DBHelper.TABLE_EVERY_DAY_LIST, null, null, null, null, null, null);
+        String intersectQuery = "SELECT name, description FROM everyDayList " +
+                "EXCEPT " +
+                "SELECT name, description FROM todoList WHERE" +
+                "(" +
+                DBHelper.ONE_DAY_TODO + " = " + today.get(Calendar.DAY_OF_MONTH) + " AND " +
+                DBHelper.ONE_MONTH_TODO + " = " + today.get(Calendar.MONTH) + " AND " +
+                DBHelper.ONE_YEAR_TODO + " = " + today.get(Calendar.YEAR) + ")";
 
-        String select = "(" +
-                "t." + DBHelper.ONE_DAY_TODO + " = " + today.get(Calendar.DAY_OF_MONTH) + " AND " +
-                "t." + DBHelper.ONE_MONTH_TODO + " = " + today.get(Calendar.MONTH) + " AND " +
-                "t." + DBHelper.ONE_YEAR_TODO + " = " + today.get(Calendar.YEAR) + ")";
-        Cursor cursorToDo = database.query(DBHelper.TABLE_TO_DO_LIST + " as t ", null, select, null, null, null, null);
+        Cursor cursorEveryDay = database.rawQuery(intersectQuery, null);
 
         int nameIndexEvery = cursorEveryDay.getColumnIndex(DBHelper.TWO_NAME_TODO);
         int descIndexEvery = cursorEveryDay.getColumnIndex(DBHelper.TWO_DESCRIPTION_TODO);
 
-        int nameIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_NAME_TODO);
-        int descIndexToDo = cursorToDo.getColumnIndex(DBHelper.ONE_DESCRIPTION_TODO);
 
-
-        //ошибка, добавляется ровно столько, сколько не ежедневных квестов
-        if (cursorToDo.moveToFirst())
+        if (cursorEveryDay.moveToFirst())
             do {
-                boolean OK = false;
-                if (cursorEveryDay.moveToFirst())
-                    do {
-                        if (cursorToDo.getString(nameIndexToDo).equals(cursorEveryDay.getString(nameIndexEvery))
-                                && cursorToDo.getString(descIndexToDo).equals(cursorEveryDay.getString(descIndexEvery)))
-                            OK = true;
+                ContentValues cv = new ContentValues();
+                try {
 
-                    } while (cursorEveryDay.moveToNext());
+                    cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
+                    cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
+                    cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
+                    cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
+                    cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
+                    cv.put(DBHelper.ONE_OK_TODO, 0);
 
-                if (!OK) {
-                    //добавление недостающих квестов
-                    ContentValues cv = new ContentValues();
-                    try {
+                    database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
 
-                        cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
-                        cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
-                        cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
-                        cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
-                        cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
-                        cv.put(DBHelper.ONE_OK_TODO, 0);
-
-                        database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
-
-                    } catch (Exception e) {
-                        Log.d("mainLog", "exept: " + e);
-                    }
+                } catch (Exception e) {
+                    Log.d("mainLog", "exept: " + e);
                 }
-            } while (cursorToDo.moveToNext());
-        else // рас уж пустой, то точно там нет ежедневок, если, конечно, ежедневки вообще есть
-        {
-            ContentValues cv = new ContentValues();
-            try {
+            } while (cursorEveryDay.moveToNext());
 
-                cv.put(DBHelper.ONE_NAME_TODO, cursorEveryDay.getString(nameIndexEvery));
-                cv.put(DBHelper.ONE_DESCRIPTION_TODO, cursorEveryDay.getString(descIndexEvery));
-                cv.put(DBHelper.ONE_DAY_TODO, today.get(Calendar.DAY_OF_MONTH));
-                cv.put(DBHelper.ONE_MONTH_TODO, today.get(Calendar.MONTH));
-                cv.put(DBHelper.ONE_YEAR_TODO, today.get(Calendar.YEAR));
-                cv.put(DBHelper.ONE_OK_TODO, 0);
-
-                database.insert(DBHelper.TABLE_TO_DO_LIST, null, cv);
-
-            } catch (Exception e) {
-                Log.d("mainLog", "exept: " + e);
-            }
-        }
-
-
-        cursorToDo.close();
         cursorEveryDay.close();
         dbHelper.close();
     }
